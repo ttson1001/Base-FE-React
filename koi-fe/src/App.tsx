@@ -10,6 +10,9 @@ import AdminLayout from "./admin-page/admin-layout";
 import User from "./admin-page/user";
 import Category from "./admin-page/category";
 import Product from "./admin-page/product";
+import SaltCalculator from "./home-page/saltcaculator";
+import ProductShop from "./home-page/product";
+import ShoppingCart from "./home-page/shopingcart";
 
 function App() {
   return (
@@ -18,6 +21,9 @@ function App() {
         <Route path="my-koi" element={<MyKoi />}></Route>
         <Route path="my-koi/:id" element={<KoiDetail />}></Route>
         <Route path="my-pond" element={<Pond />}></Route>
+        <Route path="salt-calculator" element={<SaltCalculator />}></Route>
+        <Route path="product" element={<ProductShop />}></Route>
+        <Route path="cart" element={<ShoppingCart />}></Route>
       </Route>
       <Route path="/login" element={<Login />} />
       <Route path="/register" element={<Register />} />

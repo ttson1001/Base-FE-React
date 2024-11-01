@@ -37,6 +37,7 @@ const items: MenuItem[] = [
   getItem("Food Calculator", "/food-calculator", <TeamOutlined />),
   getItem("Salt Calculator", "/salt-calculator", <FileOutlined />),
   getItem("Statistics", "/statistics", <FileOutlined />),
+  getItem("Product", "/product", <FileOutlined />),
 ];
 
 const HomeLayout: React.FC = () => {
