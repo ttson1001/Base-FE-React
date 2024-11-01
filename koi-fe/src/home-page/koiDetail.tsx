@@ -1,5 +1,8 @@
 import { Card, Col, Row, Button, Modal, Form, Input, Table } from "antd";
-import React, { useState } from "react";
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { API_SERVER } from "./api";
+import { useParams } from "react-router-dom";
 
 interface Koi {
   name: string;
@@ -33,8 +36,10 @@ const KoiDetail: React.FC = () => {
   const [isAddNoteModalVisible, setAddNoteModalVisible] = useState(false);
   const [formEdit] = Form.useForm();
   const [formNote] = Form.useForm();
+  const [data, SetData] = useState<any>();
   const [notes, setNotes] = useState<Note[]>([]);
   const [nextId, setNextId] = useState(1);
+  const { id } = useParams();
 
   // Hàm xử lý sự kiện khi nhấn nút Edit
   const handleEdit = () => {
@@ -55,6 +60,18 @@ const KoiDetail: React.FC = () => {
     formEdit.resetFields();
     setEditModalVisible(false);
   };
+
+  useEffect(() => {
+    const get = async () => {
+      try {
+        const rs = await axios.get(`${API_SERVER}api/kois/` + id);
+        SetData(rs.data.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    get();
+  }, []);
 
   const handleAddNoteOk = () => {
     const noteValues = formNote.getFieldsValue();
@@ -126,17 +143,17 @@ const KoiDetail: React.FC = () => {
         >
           <Row gutter={16}>
             <Col span={12}>
-              <h3>{koi.name}</h3>
-              <p>Age: {koi.age} year</p>
-              <p>Length: {koi.length} cm</p>
-              <p>Weight: {koi.weight} g</p>
-              <p>In pond since: {koi.inPondSince}</p>
-              <p>Purchase price: ${koi.purchasePrice}</p>
+              <h3>Name: {data?.name}</h3>
+              <p>Age: {data?.age} year</p>
+              <p>Length: {data?.length} cm</p>
+              <p>Weight: {data?.weight} g</p>
+              <p>In pond since: {data?.date}</p>
+              <p>Purchase price: ${data?.price}</p>
             </Col>
             <Col span={12}>
               <img
-                src={koi.image}
-                alt={koi.name}
+                src={data?.image}
+                alt={data?.name}
                 style={{
                   width: "100%", // Đảm bảo hình ảnh chiếm toàn bộ chiều rộng của cột
                   height: "150px", // Thiết lập chiều cao cụ thể cho hình ảnh

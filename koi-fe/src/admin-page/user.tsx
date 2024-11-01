@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Table, Button, Popconfirm, message, Input, Form } from "antd";
+import axios from "axios";
 
 interface UserData {
   userId: number;
@@ -23,9 +24,23 @@ const listData: UserData[] = [
 ];
 
 const User: React.FC = () => {
-  const [data, setData] = useState(listData);
   const [editingUserId, setEditingUserId] = useState<number | null>(null);
   const [form] = Form.useForm();
+  const [data, setData] = useState<any>([]); // Set
+
+  useEffect(() => {
+    const get = async () => {
+      try {
+        const rs = await axios.get<any>(
+          "http://localhost:5247/api/users/staff?page=1&pageSize=1000"
+        );
+        setData(rs.data.data.listData);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    get();
+  }, []);
 
   // Check if the row is currently being edited
   const isEditing = (record: UserData) => record.userId === editingUserId;
@@ -46,7 +61,7 @@ const User: React.FC = () => {
   const saveEdit = async (userId: number) => {
     try {
       const updatedUser = await form.validateFields();
-      const newData = data.map((item) =>
+      const newData = data.map((item: any) =>
         item.userId === userId ? { ...item, ...updatedUser } : item
       );
       setData(newData);
@@ -59,7 +74,7 @@ const User: React.FC = () => {
 
   // Delete user from the list
   const handleDelete = (userId: number) => {
-    const newData = data.filter((user) => user.userId !== userId);
+    const newData = data.filter((user: any) => user.userId !== userId);
     setData(newData);
     message.success(`Deleted user with ID: ${userId}`);
   };

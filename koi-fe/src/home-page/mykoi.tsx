@@ -1,12 +1,16 @@
 import { Card, Button, Modal, Form, Input, DatePicker, Row, Col } from "antd";
 import { PlusOutlined } from "@ant-design/icons";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { addKoi, API_SERVER } from "./api";
+import axios from "axios";
 
 const MyKoi: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
+  const [data, setData] = useState<any[]>([]);
   const navigate = useNavigate();
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   const showModal = () => {
     setIsModalOpen(true);
@@ -14,7 +18,7 @@ const MyKoi: React.FC = () => {
 
   const handleOk = () => {
     const values = form.getFieldsValue();
-    console.log("Form values:", values);
+    addKoi(values);
     setIsModalOpen(false);
     form.resetFields();
   };
@@ -24,37 +28,19 @@ const MyKoi: React.FC = () => {
     setIsModalOpen(false);
   };
 
+  useEffect(() => {
+    const get = async () => {
+      try {
+        const rs = await axios.get(`${API_SERVER}api/kois/user/` + user.hint);
+        setData(rs.data.data);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    get();
+  }, []);
+
   // Dữ liệu cá Koi bao gồm ID
-  const koiData = [
-    {
-      id: 1,
-      name: "Koi 1",
-      age: 2,
-      length: 30,
-      weight: 500,
-      pond: "Pond 1",
-      image:
-        "https://cacanhthaihoa.com/wp-content/uploads/2015/03/ca-koi-hariwake-1.jpg",
-    },
-    {
-      id: 2,
-      name: "Koi 2",
-      age: 3,
-      length: 25,
-      weight: 450,
-      pond: "Pond 2",
-      image: "https://example.com/path-to-koi2-image.jpg",
-    },
-    {
-      id: 3,
-      name: "Koi 3",
-      age: 1,
-      length: 35,
-      weight: 550,
-      pond: "Pond 3",
-      image: "https://example.com/path-to-koi3-image.jpg",
-    },
-  ];
 
   const handleCardClick = (id: number) => {
     navigate("/my-koi/" + id);
@@ -74,19 +60,19 @@ const MyKoi: React.FC = () => {
       <Card className="!shadow-inner w-full" bordered={true}>
         <div style={{ padding: "20px" }}>
           <Row gutter={16}>
-            {koiData.map((koi) => (
-              <Col span={8} key={koi.id}>
+            {data?.map((koi) => (
+              <Col span={8} key={koi?.id}>
                 <Card
                   className="!shadow-lg"
                   bordered={true}
                   style={{ width: 300, margin: "16px" }}
-                  onClick={() => handleCardClick(koi.id)} // Gọi hàm chuyển trang khi nhấn
+                  onClick={() => handleCardClick(koi.koiId)} // Gọi hàm chuyển trang khi nhấn
                 >
                   <Row gutter={16}>
                     <Col span={12}>
                       <img
-                        src={koi.image}
-                        alt={koi.name}
+                        src={koi?.image}
+                        alt={koi?.name}
                         style={{
                           width: "100%",
                           height: "150px",
@@ -96,11 +82,11 @@ const MyKoi: React.FC = () => {
                       />
                     </Col>
                     <Col span={12}>
-                      <h3>{koi.name}</h3>
-                      <p>Age: {koi.age} years</p>
-                      <p>Length: {koi.length} cm</p>
-                      <p>Weight: {koi.weight} g</p>
-                      <p>Pond: {koi.pond}</p>
+                      <h3>{koi?.name}</h3>
+                      <p>Age: {koi?.age} years</p>
+                      <p>Length: {koi?.length} cm</p>
+                      <p>Weight: {koi?.variety} g</p>
+                      <p>Pond: {koi?.pondName}</p>
                     </Col>
                   </Row>
                 </Card>
@@ -137,7 +123,7 @@ const MyKoi: React.FC = () => {
             <Col span={12}>
               <Form.Item
                 label="Koi Name"
-                name="name"
+                name="Name"
                 rules={[{ required: true, message: "Please enter koi name!" }]}
               >
                 <Input placeholder="Enter koi name" />
@@ -147,7 +133,7 @@ const MyKoi: React.FC = () => {
               <Form.Item
                 label="Image (url)"
                 name="image"
-                rules={[{ required: true, message: "Please enter koi image!" }]}
+                // rules={[{ required: true, message: "Please enter koi image!" }]}
               >
                 <Input placeholder="Enter koi image URL" />
               </Form.Item>
@@ -185,24 +171,15 @@ const MyKoi: React.FC = () => {
             </Col>
             <Col span={12}>
               <Form.Item
-                label="Pond"
-                name="pond"
+                label="PondId"
+                name="pondId"
                 rules={[{ required: true, message: "Please enter pond!" }]}
               >
                 <Input placeholder="Enter pond" />
               </Form.Item>
             </Col>
             <Col span={12}>
-              <Form.Item
-                label="In pond since"
-                name="inPondSince"
-                rules={[
-                  {
-                    required: true,
-                    message: "Please select koi's in pond since!",
-                  },
-                ]}
-              >
+              <Form.Item label="In pond since" name="inPondSince">
                 <DatePicker
                   style={{ width: "100%" }}
                   placeholder="Select date"
@@ -216,6 +193,25 @@ const MyKoi: React.FC = () => {
                 rules={[{ required: true, message: "Please enter koi price!" }]}
               >
                 <Input placeholder="Enter price" type="number" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Gender" name="gender">
+                <Input placeholder="Enter gender" type="text" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item label="Variety" name="variety">
+                <Input placeholder="Enter variety" />
+              </Form.Item>
+            </Col>
+            <Col span={12}>
+              <Form.Item
+                label="Physiqueld"
+                name="physiqueld"
+                rules={[{ required: true, message: "Please enter koi price!" }]}
+              >
+                <Input placeholder="Enter physiqueld" type="number" />
               </Form.Item>
             </Col>
           </Row>

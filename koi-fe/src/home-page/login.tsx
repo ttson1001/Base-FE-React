@@ -2,10 +2,26 @@ import { Button, Card, Form, Input } from "antd";
 import React from "react";
 import "./home.css";
 import logo from "../assets/images/image.png";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { login } from "./api";
 const Login: React.FC = () => {
+  const navigate = useNavigate();
   const onFinish = (values: any) => {
-    console.log("Form Values:", values);
+    const rs = login(values.email, values.password);
+
+    rs.then((x) => {
+      if (x) {
+        // Store the user role in localStorage as "user"
+        localStorage.setItem("user", JSON.stringify(x));
+
+        if (x.role === "User") {
+          navigate("/my-koi");
+        }
+        if (x.role === "Admin") {
+          navigate("/admin");
+        }
+      }
+    }).catch();
   };
   return (
     <div

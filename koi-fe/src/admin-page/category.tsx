@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Table, Button, Input, Form, message, Popconfirm } from "antd";
+import axios from "axios";
 
 interface CategoryData {
   categoryId: number;
@@ -21,9 +22,23 @@ const initialData: CategoryData[] = [
 ];
 
 const Category: React.FC = () => {
-  const [data, setData] = useState(initialData);
   const [editingKey, setEditingKey] = useState<number | null>(null);
   const [form] = Form.useForm();
+  const [data, setData] = useState<any>([]); // Set
+
+  useEffect(() => {
+    const get = async () => {
+      try {
+        const rs = await axios.get<any>(
+          "http://localhost:5247/api/Categorys/GetAll"
+        );
+        setData(rs.data.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    get();
+  }, []);
 
   const isEditing = (record: CategoryData) => record.categoryId === editingKey;
 
@@ -54,7 +69,7 @@ const Category: React.FC = () => {
   };
 
   const deleteCategory = (categoryId: number) => {
-    const newData = data.filter((item) => item.categoryId !== categoryId);
+    const newData = data.filter((item: any) => item.categoryId !== categoryId);
     setData(newData);
     message.success("Category deleted successfully!");
   };
