@@ -1,7 +1,6 @@
 import { Button, Form, Modal, Input, Row, Col, Card } from "antd";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { PlusOutlined } from "@ant-design/icons";
-import { useNavigate } from "react-router-dom";
 
 interface PondType {
   pondId: string;
@@ -15,33 +14,45 @@ interface PondType {
 const Pond: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
-  const [ponds, setPonds] = useState<PondType[]>([]);
+  const [ponds, setPonds] = useState<PondType[]>(() => {
+    const storedPonds = localStorage.getItem("ponds");
+    return storedPonds ? JSON.parse(storedPonds) : [];
+  });
   const [editingPond, setEditingPond] = useState<PondType | null>(null);
-  const navigate = useNavigate();
+
+  useEffect(() => {
+    localStorage.setItem("ponds", JSON.stringify(ponds));
+  }, [ponds]);
 
   const showModal = (pond?: PondType) => {
     setEditingPond(pond || null);
     if (pond) {
       form.setFieldsValue(pond); // Populate the form if editing
     } else {
-      form.resetFields(); // Reset form if adding new pond
+      form.resetFields(); // Reset form if adding a new pond
     }
     setIsModalOpen(true);
   };
 
   const handleOk = () => {
-    const values = form.getFieldsValue();
-    if (editingPond) {
-      // Update existing pond
-      setPonds(
-        ponds.map((p) => (p.pondId === editingPond.pondId ? values : p))
-      );
-    } else {
-      // Add new pond
-      setPonds([...ponds, { ...values, pondId: Date.now().toString() }]); // Generate a unique pondId
-    }
-    setIsModalOpen(false);
-    form.resetFields();
+    form.validateFields().then((values) => {
+      if (editingPond) {
+        // Update existing pond
+        setPonds((prevPonds) =>
+          prevPonds.map((p) =>
+            p.pondId === editingPond.pondId ? { ...p, ...values } : p
+          )
+        );
+      } else {
+        // Add new pond
+        setPonds((prevPonds) => [
+          ...prevPonds,
+          { ...values, pondId: Date.now().toString() },
+        ]);
+      }
+      setIsModalOpen(false);
+      form.resetFields();
+    });
   };
 
   const handleCancel = () => {

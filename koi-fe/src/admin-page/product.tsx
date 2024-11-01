@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Table, Button, Popconfirm, message, Modal, Input, Form } from "antd";
+import axios from "axios";
 
 interface ProductData {
   productId: number;
@@ -24,12 +25,26 @@ const initialData: ProductData[] = [
 ];
 
 const Product: React.FC = () => {
-  const [data, setData] = useState(initialData);
   const [editingProduct, setEditingProduct] = useState<ProductData | null>(
     null
   );
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
+  const [data, setData] = useState<any>([]); // Set
+
+  useEffect(() => {
+    const get = async () => {
+      try {
+        const rs = await axios.get<any>(
+          "http://localhost:5247/api/Products/GetAll"
+        );
+        setData(rs.data.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    get();
+  }, []);
 
   // Open edit modal and populate form
   const handleEdit = (product: ProductData) => {
@@ -40,7 +55,9 @@ const Product: React.FC = () => {
 
   // Handle delete action
   const handleDelete = (productId: number) => {
-    const newData = data.filter((product) => product.productId !== productId);
+    const newData = data.filter(
+      (product: any) => product.productId !== productId
+    );
     setData(newData);
     message.success(`Deleted product with ID: ${productId}`);
   };
@@ -49,7 +66,7 @@ const Product: React.FC = () => {
   const saveEdit = async () => {
     try {
       const updatedProduct = await form.validateFields();
-      const newData = data.map((item) =>
+      const newData = data.map((item: any) =>
         item.productId === editingProduct?.productId
           ? { ...item, ...updatedProduct }
           : item
