@@ -1,9 +1,7 @@
 import React, { useState } from "react";
 import {
   DesktopOutlined,
-  FileOutlined,
   PieChartOutlined,
-  TeamOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import type { MenuProps } from "antd";
@@ -31,15 +29,12 @@ function getItem(
 
 // Define your menu items with path keys
 const items: MenuItem[] = [
-  getItem("My Koi", "/my-koi", <PieChartOutlined />),
-  getItem("My Pond", "/my-pond", <DesktopOutlined />),
-  getItem("Water Parameter", "/water-parameter", <UserOutlined />),
-  getItem("Food Calculator", "/food-calculator", <TeamOutlined />),
-  getItem("Salt Calculator", "/salt-calculator", <FileOutlined />),
-  getItem("Statistics", "/statistics", <FileOutlined />),
+  getItem("Product", "product", <PieChartOutlined />),
+  getItem("Category", "category", <DesktopOutlined />),
+  getItem("User", "user", <UserOutlined />),
 ];
 
-const HomeLayout: React.FC = () => {
+const AdminLayout: React.FC = () => {
   const [collapsed, setCollapsed] = useState(false);
   const navigate = useNavigate(); // Initialize useNavigate for navigation
 
@@ -70,7 +65,7 @@ const HomeLayout: React.FC = () => {
         <div className="demo-logo-vertical" />
         <Menu
           theme="dark"
-          defaultSelectedKeys={["/my-koi"]}
+          defaultSelectedKeys={["/user"]}
           mode="inline"
           items={items}
           onClick={handleMenuClick} // Attach click handler to navigate
@@ -105,4 +100,4 @@ const HomeLayout: React.FC = () => {
   );
 };
 
-export default HomeLayout;
+export default AdminLayout;
